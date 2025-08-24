@@ -1,0 +1,9 @@
+{
+  "type": "module",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.8"
+  }
+}

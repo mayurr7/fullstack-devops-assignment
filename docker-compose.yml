@@ -1,0 +1,79 @@
+version: "3.9"
+
+services:
+  api-service:
+    build:
+      context: ./api-service
+      dockerfile: Dockerfile
+    container_name: api-service
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./api-service/.env
+    volumes:
+      - ./api-service:/app     
+      - /app/node_modules   
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    networks:
+      - app-network
+      
+
+  consumer-service:
+    build:
+      context: ./consumer-service
+      dockerfile: Dockerfile
+    container_name: consumer-service
+    env_file:
+      - ./consumer-service/.env
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - app-network
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=pass
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672" # RabbitMQ dashboard
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
